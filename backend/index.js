@@ -8,8 +8,6 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN?.split(",") || "*"
 }));
 
-app.use(cors(corsOptions));
-
 app.use(express.json())
 
 app.use('/', Router)
