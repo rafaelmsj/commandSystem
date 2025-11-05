@@ -34,6 +34,13 @@ export const PremiosCliente: React.FC = () => {
   });
   const [colocacaoSelecionada, setColocacaoSelecionada] = useState<string | null>(null);
 
+  // Adicione no topo do arquivo, antes do export
+  const gerarUUID = () =>
+    (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Math.random().toString(36).substring(2, 15);
+
+
   // 🔹 Busca os produtos disponíveis ao carregar
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -588,7 +595,7 @@ export const PremiosCliente: React.FC = () => {
                       ?.nome || 'Produto';
 
                   const novoPremioObj: PremioCliente = {
-                    premio_id: crypto.randomUUID(),
+                    premio_id: gerarUUID(),
                     colocacao_id: colocacaoSelecionada,
                     produto_id: novoProduto.produto_id,
                     nome_produto: produtoNome,

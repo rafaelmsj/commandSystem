@@ -27,11 +27,12 @@ export const CadastroRifa: React.FC<CadastroRifaProps> = ({ onVoltar }) => {
   const [nome, setNome] = useState('');
   const [data, setData] = useState('');
   const [quantidadeGanhadores, setQuantidadeGanhadores] = useState(1);
-  const [colocacoes, setColocacoes] = useState<Colocacao[]>([
-    { posicao: 1, premios: [{ id: crypto.randomUUID(), produto_id: '', quantidade: 1 }] }
-  ]);
   const [salvando, setSalvando] = useState(false);
 
+  const handleVoltar = () => {
+    if (onVoltar) onVoltar();
+    else navigate('/rifas');
+  };
   const [produtos, setProdutos] = useState<{ id: string | number; nome: string }[]>([]);
 
   useEffect(() => {
@@ -46,6 +47,16 @@ export const CadastroRifa: React.FC<CadastroRifaProps> = ({ onVoltar }) => {
     carregarProdutos();
   }, []);
 
+  // Adicione no topo do arquivo, antes do export
+  const gerarUUID = () =>
+    (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Math.random().toString(36).substring(2, 15);
+  const [colocacoes, setColocacoes] = useState<Colocacao[]>([
+    { posicao: 1, premios: [{ id: gerarUUID(), produto_id: '', quantidade: 1 }] }
+  ]);
+
+
   const atualizarQuantidadeGanhadores = (qtd: number) => {
     const novaQtd = Math.max(1, qtd);
     setQuantidadeGanhadores(novaQtd);
@@ -58,7 +69,7 @@ export const CadastroRifa: React.FC<CadastroRifaProps> = ({ onVoltar }) => {
       } else {
         novasColocacoes.push({
           posicao: i,
-          premios: [{ id: crypto.randomUUID(), produto_id: '', quantidade: 1 }]
+          premios: [{ id: gerarUUID(), produto_id: '', quantidade: 1 }]
         });
       }
     }
@@ -70,7 +81,7 @@ export const CadastroRifa: React.FC<CadastroRifaProps> = ({ onVoltar }) => {
       if (col.posicao === posicao) {
         return {
           ...col,
-          premios: [...col.premios, { id: crypto.randomUUID(), produto_id: '', quantidade: 1 }]
+          premios: [...col.premios, { id: gerarUUID(), produto_id: '', quantidade: 1 }]
         };
       }
       return col;
@@ -228,14 +239,14 @@ export const CadastroRifa: React.FC<CadastroRifaProps> = ({ onVoltar }) => {
                       value={
                         premio.produto_id
                           ? produtos
-                              .filter(
-                                (p) =>
-                                  p.id.toString() === premio.produto_id.toString()
-                              )
-                              .map((p) => ({
-                                value: p.id,
-                                label: p.nome,
-                              }))[0] || null
+                            .filter(
+                              (p) =>
+                                p.id.toString() === premio.produto_id.toString()
+                            )
+                            .map((p) => ({
+                              value: p.id,
+                              label: p.nome,
+                            }))[0] || null
                           : null
                       }
                       onChange={(opt) => {
@@ -304,7 +315,7 @@ export const CadastroRifa: React.FC<CadastroRifaProps> = ({ onVoltar }) => {
       ))}
 
       <div className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={onVoltar}>
+        <Button variant="secondary" onClick={handleVoltar}>
           Cancelar
         </Button>
         <Button
