@@ -63,7 +63,7 @@ class ClientController {
             const { name, number, endereco } = req.body
             const id_user = req.params.id
 
-            if (!name, !number, !endereco) return res.status(400).json({ success: false, message: 'Preencha todos os campos!' })
+            if (!name, !number) return res.status(400).json({ success: false, message: 'Preencha todos os campos!' })
 
             if (name.length < 3) return res.status(400).json({ success: false, message: 'Digite um nome válido.' })
 

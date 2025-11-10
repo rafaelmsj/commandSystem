@@ -22,7 +22,7 @@ export default function Login() {
 
           api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
 
-        setTimeout(() => navigate('/'), 1000);
+        setTimeout(() => navigate('/'), 100);
       } else {
         setError('Resposta inesperada do servidor');
       }

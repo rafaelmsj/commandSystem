@@ -5,7 +5,7 @@ class EstoqueService {
     async UpdateEstoque(estoque_atual, estoque_minimo, id) {
         try {
 
-            const [rows] = await db.execute(`SELECT nome, estoque_atual FROM produto WHERE id = ?`, [id]);
+            const [rows] = await db.query(`SELECT nome, estoque_atual FROM produto WHERE id = ?`, [id]);
             if (rows.length === 0) return { success: false, message: 'Produto não encontrado.' };
 
             const produto = rows[0];
@@ -13,7 +13,7 @@ class EstoqueService {
             const novoEstoque = parseFloat(estoque_atual) || 0;
             const diferenca = novoEstoque - estoqueAntigo;
 
-            await db.execute(
+            await db.query(
                 `UPDATE produto SET estoque_atual = ?, estoque_minimo = ? WHERE id = ?`,
                 [novoEstoque, estoque_minimo, id]
             );
@@ -22,7 +22,7 @@ class EstoqueService {
                 const tipo = diferenca > 0 ? 'entrada' : 'saida';
                 const quantidade = Math.abs(diferenca);
 
-                await db.execute(
+                await db.query(
                     `INSERT INTO movimentacao_estoque 
                         (produto_id, cliente_id, origem, tipo, quantidade, descricao, created_at)
                         VALUES (?, NULL, ?, ?, ?, ?, NOW())`,
@@ -48,7 +48,7 @@ class EstoqueService {
 
     async ProdutosEstoqueBaixo() {
         try {
-            const result = await db.execute(`SELECT * FROM produto WHERE estoque_atual <= estoque_minimo ORDER BY estoque_atual ASC`);
+            const result = await db.query(`SELECT * FROM produto WHERE estoque_atual <= estoque_minimo ORDER BY estoque_atual ASC`);
             return { success: true, message: 'Lista de produtos.', products: result[0] }
         } catch (err) {
             console.log({ success: false, error: err, method: 'ProductService / ProdutosEstoqueBaixo()' })
@@ -58,13 +58,13 @@ class EstoqueService {
 
     async DiminuirEstoque(produto_id, quantidade, origem = null, cliente_id = null, descricao = null) {
         try {
-            const [rows] = await db.execute(`SELECT estoque_atual FROM produto WHERE id = ?`, [produto_id]);
+            const [rows] = await db.query(`SELECT estoque_atual FROM produto WHERE id = ?`, [produto_id]);
             if (!rows[0]) return { success: false, message: 'Produto não encontrado.' };
 
             const novoEstoque = rows[0].estoque_atual - quantidade;
             if (novoEstoque < 0) return { success: false, message: 'Estoque insuficiente.' };
 
-            await db.execute(`UPDATE produto SET estoque_atual = ? WHERE id = ?`, [novoEstoque, produto_id]);
+            await db.query(`UPDATE produto SET estoque_atual = ? WHERE id = ?`, [novoEstoque, produto_id]);
 
             await this.RegistrarMovimentacao({
                 produto_id,
@@ -84,11 +84,11 @@ class EstoqueService {
 
     async AumentarEstoque(produto_id, quantidade, origem = null, cliente_id = null, descricao = null) {
         try {
-            const [rows] = await db.execute(`SELECT estoque_atual FROM produto WHERE id = ?`, [produto_id]);
+            const [rows] = await db.query(`SELECT estoque_atual FROM produto WHERE id = ?`, [produto_id]);
             if (!rows[0]) return { success: false, message: 'Produto não encontrado.' };
 
             const novoEstoque = rows[0].estoque_atual + quantidade;
-            await db.execute(`UPDATE produto SET estoque_atual = ? WHERE id = ?`, [novoEstoque, produto_id]);
+            await db.query(`UPDATE produto SET estoque_atual = ? WHERE id = ?`, [novoEstoque, produto_id]);
 
             await this.RegistrarMovimentacao({
                 produto_id,
@@ -108,7 +108,7 @@ class EstoqueService {
 
     async RegistrarMovimentacao({ produto_id, cliente_id, origem, tipo, quantidade, descricao }) {
         try {
-            await db.execute(
+            await db.query(
                 `INSERT INTO movimentacao_estoque (produto_id, cliente_id, origem, tipo, quantidade, descricao)
          VALUES (?, ?, ?, ?, ?, ?)`,
                 [produto_id, cliente_id, origem, tipo, quantidade, descricao]
@@ -150,7 +150,7 @@ class EstoqueService {
             }
 
             // Contagem total para paginação
-            const [countResult] = await db.execute(`
+            const [countResult] = await db.query(`
                 SELECT COUNT(*) AS total
                 FROM movimentacao_estoque m
                 ${where}
@@ -159,7 +159,7 @@ class EstoqueService {
             const totalPages = Math.ceil(total / limit);
 
             // Consulta paginada e ordenada
-            const [rows] = await db.execute(`
+            const [rows] = await db.query(`
                 SELECT 
                     m.id,
                     m.produto_id,
@@ -218,7 +218,7 @@ class EstoqueService {
                 params.push(produto_id);
             }
 
-            const [rows] = await db.execute(`
+            const [rows] = await db.query(`
       SELECT 
         p.nome AS produto_nome,
         SUM(m.quantidade) AS total_movimentado,

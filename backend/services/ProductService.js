@@ -7,7 +7,7 @@ class ProductService {
 
             const nameOk = await this.FirstLetterUpper(nome.toLowerCase().trim())
 
-            await db.execute(`INSERT INTO produto (nome, valorPadrao, estoque_atual, estoque_minimo) VALUES (?, ?, ?, ?)`,
+            await db.query(`INSERT INTO produto (nome, valorPadrao, estoque_atual, estoque_minimo) VALUES (?, ?, ?, ?)`,
                 [nameOk, valorPadrao, estoque_atual, estoque_minimo]
             )
 
@@ -23,7 +23,7 @@ class ProductService {
         try {
             const nameOk = await this.FirstLetterUpper(nome.toLowerCase().trim())
 
-            await db.execute(`UPDATE produto SET nome = ?, valorPadrao = ?, estoque_atual = ?, estoque_minimo = ? WHERE id = ?`,
+            await db.query(`UPDATE produto SET nome = ?, valorPadrao = ?, estoque_atual = ?, estoque_minimo = ? WHERE id = ?`,
                 [nameOk, valorPadrao, estoque_atual, estoque_minimo, id_produto]
             )
 
@@ -37,7 +37,7 @@ class ProductService {
 
     async FindName(nome) {
         try {
-            const result = await db.execute(`SELECT * FROM produto WHERE nome = ?`, [nome])
+            const result = await db.query(`SELECT * FROM produto WHERE nome = ?`, [nome])
 
             if (result[0][0] == undefined) return { success: false, message: 'Produto não encontrado.' }
 
@@ -53,12 +53,12 @@ class ProductService {
         try {
 
             if (search == undefined || search == '') {
-                const result = await db.execute(`SELECT * FROM produto ORDER BY nome ASC`)
+                const result = await db.query(`SELECT * FROM produto ORDER BY nome ASC`)
 
                 return { success: true, message: 'Lista de produtos.', products: result[0] }
             }
 
-            const result = await db.execute(`SELECT * FROM produto WHERE nome LIKE ? ORDER BY nome ASC`, [`%${search}%`])
+            const result = await db.query(`SELECT * FROM produto WHERE nome LIKE ? ORDER BY nome ASC`, [`%${search}%`])
 
             return { success: true, message: 'Lista de produtos.', products: result[0] }
 

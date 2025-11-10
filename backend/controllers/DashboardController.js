@@ -28,6 +28,15 @@ class DashboardController {
     }
   }
 
+  async getPremiosEntregar(req, res) {
+    try {
+      const produtos = await DashboardService.getPremiosEntregar();
+      res.json(produtos);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async Caixa(req, res) {
     try {
       const { dataInicio, dataFim, tipo, forma_pagamento, page = 1, limit = 10 } = req.query;

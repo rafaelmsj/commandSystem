@@ -49,6 +49,7 @@ Router.get('/dashboard/comandas', DashboardController.getComandas)
 Router.get('/dashboard/produtos-mais-vendidos', DashboardController.getProdutosMaisVendidos)
 Router.get('/caixa', DashboardController.Caixa)
 Router.get('/caixa/exportar', DashboardController.ExportarCaixa);
+Router.get('/premios-a-entregar', DashboardController.getPremiosEntregar);
 
 Router.post('/rifas', RifaController.Create)
 Router.delete('/rifas/:rifa_id', RifaController.DeletarRifa)

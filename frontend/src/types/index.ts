@@ -51,9 +51,16 @@ export interface ProdutoMaisVendido {
   totalVendido: string;
 }
 
+export interface PremiosAEntregar {
+  nome_produto: string;
+  quantidade: number;
+  estoque_atual: number;
+}
+
 export interface DashboardData {
   produtosMaisVendidos: ProdutoMaisVendido[];
   comandasRecentes: Comanda[];
+  PremiosAEntregar: PremiosAEntregar[];
   totalAberto: number;
   totalPago: number;
   quantidadeComandas: number;

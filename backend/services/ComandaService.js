@@ -88,7 +88,7 @@ class ComandaService {
         baseQuery += ` WHERE ` + whereClauses.join(` AND `);
       }
 
-      baseQuery += ` ORDER BY cl.name ASC`;
+      baseQuery += ` ORDER BY cl.id DESC`;
 
       const [result] = await db.execute(baseQuery, queryParams);
 

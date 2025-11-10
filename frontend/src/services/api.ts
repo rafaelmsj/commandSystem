@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Cliente, Produto, Comanda, LancamentoProduto, Pagamento, DashboardData, ProdutoMaisVendido, RifaCompleta, Colocacao, Premio, PremioCliente } from '../types';
+import { Cliente, Produto, Comanda, LancamentoProduto, Pagamento, DashboardData, ProdutoMaisVendido, RifaCompleta, Colocacao, Premio, PremioCliente, PremiosAEntregar } from '../types';
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // ajuste se necessário
@@ -102,6 +102,8 @@ export const dashboardService = {
   getProdutosMaisVendidos: () => api.get<ProdutoMaisVendido[]>('/dashboard/produtos-mais-vendidos'),
 
   getComandasRecentes: () => api.get<Comanda[]>('/dashboard/comandas'),
+
+  getPremiosAEntregar: () => api.get<PremiosAEntregar[]>('/premios-a-entregar'),
 };
 
 export interface SearchResult {

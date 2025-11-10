@@ -7,7 +7,7 @@ class ClientService {
 
             const nameOk = await this.FirstLetterUpper(name.toLowerCase().trim())
 
-            await db.execute(`INSERT INTO client (name, number, endereco) VALUES (?, ?, ?)`,
+            await db.query(`INSERT INTO client (name, number, endereco) VALUES (?, ?, ?)`,
                 [nameOk, number.trim(), endereco.trim()]
             )
 
@@ -23,7 +23,7 @@ class ClientService {
         try {
             const nameOk = await this.FirstLetterUpper(name.toLowerCase().trim())
 
-            await db.execute(`UPDATE client SET name = ?, number = ?, endereco = ? WHERE id = ?`,
+            await db.query(`UPDATE client SET name = ?, number = ?, endereco = ? WHERE id = ?`,
                 [nameOk, number.trim(), endereco.trim(), id_user]
             )
 
@@ -37,7 +37,7 @@ class ClientService {
 
     async FindName(name) {
         try {
-            const result = await db.execute(`SELECT * FROM client WHERE name = ?`,
+            const result = await db.query(`SELECT * FROM client WHERE name = ?`,
                 [`%${name}%`]
             )
 
@@ -53,7 +53,7 @@ class ClientService {
 
     async FindNumber(number) {
         try {
-            const result = await db.execute(`SELECT * FROM client WHERE number = ?`,
+            const result = await db.query(`SELECT * FROM client WHERE number = ?`,
                 [number]
             )
 
@@ -70,12 +70,12 @@ class ClientService {
     async GetAll(search) {
         try {
             if (search == undefined || search == '') {
-                const result = await db.execute(`SELECT * FROM client ORDER BY name ASC`)
+                const result = await db.query(`SELECT * FROM client ORDER BY name ASC`)
 
                 return { success: true, message: 'Lista de clientes.', clients: result[0] }
             }
 
-            const result = await db.execute(
+            const result = await db.query(
                 `SELECT * FROM client WHERE name LIKE ? ORDER BY name ASC`,
                 [`%${search}%`]
               );
@@ -90,7 +90,7 @@ class ClientService {
 
     async GetById(id_user) {
         try {
-            const result = await db.execute(`SELECT * FROM client WHERE id = ?`,
+            const result = await db.query(`SELECT * FROM client WHERE id = ?`,
                 [id_user]
             )
 

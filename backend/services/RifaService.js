@@ -48,9 +48,10 @@ class RifaService {
       const params = [];
 
       if (filters.status) {
-        conditions.push("r.status = ?");
+        conditions.push("LOWER(TRIM(r.status)) = LOWER(TRIM(?))");
         params.push(filters.status);
       }
+
 
       if (filters.data) {
         conditions.push("DATE(r.data) = ?");
@@ -319,7 +320,7 @@ class RifaService {
     }
   }
 
-    async DeletarPremio(premio_id) {
+  async DeletarPremio(premio_id) {
 
     const sql = 'DELETE FROM premios WHERE id = ?;';
     const dataRifa = [premio_id];

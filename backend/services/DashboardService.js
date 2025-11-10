@@ -4,33 +4,33 @@ class DashboardService {
   async getData() {
     try {
       // Total em aberto (comandas abertas)
-      const [totalAberto] = await db.execute(`
+      const [totalAberto] = await db.query(`
         SELECT COALESCE(SUM(SaldoRestante), 0) as total 
         FROM comanda
         WHERE status = 'Aberta'
       `);
 
       // Total pago (todas as comandas)
-      const [totalPago] = await db.execute(`
+      const [totalPago] = await db.query(`
         SELECT COALESCE(SUM(valorPago), 0) as total 
         FROM comanda
       `);
 
       // Quantidade total de comandas
-      const [quantidadeComandas] = await db.execute(`
+      const [quantidadeComandas] = await db.query(`
         SELECT COUNT(*) as total 
         FROM comanda
       `);
 
       // Comandas abertas
-      const [comandasAbertas] = await db.execute(`
+      const [comandasAbertas] = await db.query(`
         SELECT COUNT(*) as total 
         FROM comanda 
         WHERE status = 'Aberta'
       `);
 
       // Comandas fechadas
-      const [comandasFechadas] = await db.execute(`
+      const [comandasFechadas] = await db.query(`
         SELECT COUNT(*) as total 
         FROM comanda 
         WHERE status = 'Fechada'
@@ -50,7 +50,7 @@ class DashboardService {
 
   async getComandas() {
     try {
-      const [rows] = await db.execute(`
+      const [rows] = await db.query(`
         SELECT 
           c.id,
           cl.name as clienteNome,
@@ -71,7 +71,7 @@ class DashboardService {
 
   async getProdutosMaisVendidos() {
     try {
-      const [rows] = await db.execute(`
+      const [rows] = await db.query(`
         SELECT 
           p.nome,
           SUM(lp.quantidade) as totalVendido
@@ -85,6 +85,24 @@ class DashboardService {
       return rows;
     } catch (error) {
       throw new Error(`Erro ao buscar produtos mais vendidos: ${error.message}`);
+    }
+  }
+
+  async getPremiosEntregar() {
+    try {
+      const [rows] = await db.query(`
+        SELECT 
+          DISTINCT(pdt.nome) AS nome_produto
+          ,COUNT(prm.produto_id) AS quantidade
+          , pdt.estoque_atual
+        FROM premios prm
+        LEFT JOIN produto pdt ON pdt.id = prm.produto_id 
+        WHERE prm.status_entrega = 'pendente';
+      `);
+
+      return rows;
+    } catch (error) {
+      throw new Error(`Erro ao buscar premios a serem entregue: ${error.message}`);
     }
   }
 
@@ -147,7 +165,7 @@ class DashboardService {
 
       // ====== TOTAL DE REGISTROS ======
       const countQuery = `SELECT COUNT(*) as total FROM (${baseQuery}) as totalTable`;
-      const [countRows] = await db.execute(countQuery, params);
+      const [countRows] = await db.query(countQuery, params);
       const total = countRows[0]?.total || 0;
 
       // ====== TOTAL FINANCEIRO (sem LIMIT) ======
@@ -160,7 +178,7 @@ class DashboardService {
         COALESCE(SUM(valor), 0) AS totalGeral
       FROM (${baseQuery}) as totalsTable;
     `;
-      const [totalRows] = await db.execute(totalQuery, params);
+      const [totalRows] = await db.query(totalQuery, params);
       const totais = totalRows[0];
 
       // ====== PAGINAÇÃO (LIMIT/OFFSET) ======
@@ -172,7 +190,7 @@ class DashboardService {
       ORDER BY data DESC
       LIMIT ? OFFSET ?
     `;
-      const [rows] = await db.execute(paginatedQuery, [...params, limit, offset]);
+      const [rows] = await db.query(paginatedQuery, [...params, limit, offset]);
 
       return { registros: rows, pagination: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit }, totais };
     } catch (error) {

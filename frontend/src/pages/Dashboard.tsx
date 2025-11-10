@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Users, FileText, Car, Package, AlertTriangle } from 'lucide-react';
 import Card from '../components/UI/Card';
-import { DashboardData, ProdutoMaisVendido, Comanda } from '../types';
+import { DashboardData, PremiosAEntregar, Comanda } from '../types';
 import { dashboardService, lavacaoService, estoqueService } from '../services/api';
 
 export default function Dashboard() {
-  const [produtosMaisVendidos, setProdutosMaisVendidos] = useState<ProdutoMaisVendido[]>([]);
+  const [PremiosAEntregar, setPremiosAEntregar] = useState<PremiosAEntregar[]>([]);
   const [comandasRecentes, setComandasRecentes] = useState<Comanda[]>([]);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,20 +23,20 @@ export default function Dashboard() {
       setLoading(true);
 
       const [
-        produtosResponse,
+        premiosResponse,
         comandasResponse,
         lavacoesResponse,
         estoqueResponse,
         antigasResponse,
       ] = await Promise.all([
-        dashboardService.getProdutosMaisVendidos(),
+        dashboardService.getPremiosAEntregar(),
         dashboardService.getComandasRecentes(),
         lavacaoService.getAbertas(),
         estoqueService.getBaixo(),
         lavacaoService.getAntigas(),
       ]);
 
-      setProdutosMaisVendidos(produtosResponse.data);
+      setPremiosAEntregar(premiosResponse.data);
       setComandasRecentes(comandasResponse.data);
       setLavacoesAbertas(lavacoesResponse.data.resumo || { total_abertas: 0, valor_aberto: 0 });
       setProdutosEstoqueBaixo(estoqueResponse.data || []);
@@ -146,19 +146,34 @@ export default function Dashboard() {
         </Card>
 
         <Card>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Produtos Mais Vendidos
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            Prêmios a serem entregue
           </h3>
-          <div className="space-y-3">
-            {produtosMaisVendidos.length > 0 ? (
-              produtosMaisVendidos.map((produto) => (
-                <div key={produto.nome} className="flex justify-between items-center">
-                  <span className="text-gray-900">{produto.nome}</span>
-                  <span className="text-gray-600 font-medium">{parseInt(produto.totalVendido)} unidades</span>
+
+          {/* 🔽 Div com altura fixa e rolagem interna */}
+          <div
+            className="space-y-3 max-h-72 overflow-y-auto pr-2"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#CBD5E1 transparent', // cor suave da barra no Firefox
+            }}
+          >
+            {PremiosAEntregar.length > 0 ? (
+              PremiosAEntregar.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex justify-between items-center p-2 bg-gray-50 rounded-md border border-gray-100 shadow-sm"
+                >
+                  <span className="font-medium text-gray-800 truncate">{p.nome_produto}</span>
+                  <span className='text-sm font-semibold text-red-600'                  >
+                    Total: {p.quantidade}
+                  </span>
+                  <span className='text-sm font-semibold text-orange-600'>Em estoque: {p.estoque_atual}</span>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">Nenhum produto vendido ainda.</p>
+              <p className="text-gray-500">Nenhum produto com estoque baixo.</p>
             )}
           </div>
         </Card>
@@ -166,42 +181,41 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <Card>
-  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-    <AlertTriangle className="h-5 w-5 text-yellow-500" />
-    Produtos com Baixo Estoque
-  </h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            Produtos com Baixo Estoque
+          </h3>
 
-  {/* 🔽 Div com altura fixa e rolagem interna */}
-  <div
-    className="space-y-3 max-h-72 overflow-y-auto pr-2"
-    style={{
-      scrollbarWidth: 'thin',
-      scrollbarColor: '#CBD5E1 transparent', // cor suave da barra no Firefox
-    }}
-  >
-    {produtosEstoqueBaixo.length > 0 ? (
-      produtosEstoqueBaixo.map((p) => (
-        <div
-          key={p.id}
-          className="flex justify-between items-center p-2 bg-gray-50 rounded-md border border-gray-100 shadow-sm"
-        >
-          <span className="font-medium text-gray-800 truncate">{p.nome}</span>
-          <span
-            className={`text-sm font-semibold ${
-              p.estoque_atual <= p.estoque_minimo
-                ? 'text-red-600'
-                : 'text-yellow-600'
-            }`}
+          {/* 🔽 Div com altura fixa e rolagem interna */}
+          <div
+            className="space-y-3 max-h-72 overflow-y-auto pr-2"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#CBD5E1 transparent', // cor suave da barra no Firefox
+            }}
           >
-            {p.estoque_atual}/{p.estoque_minimo}
-          </span>
-        </div>
-      ))
-    ) : (
-      <p className="text-gray-500">Nenhum produto com estoque baixo.</p>
-    )}
-  </div>
-</Card>
+            {produtosEstoqueBaixo.length > 0 ? (
+              produtosEstoqueBaixo.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex justify-between items-center p-2 bg-gray-50 rounded-md border border-gray-100 shadow-sm"
+                >
+                  <span className="font-medium text-gray-800 truncate">{p.nome}</span>
+                  <span
+                    className={`text-sm font-semibold ${p.estoque_atual <= p.estoque_minimo
+                      ? 'text-red-600'
+                      : 'text-yellow-600'
+                      }`}
+                  >
+                    {p.estoque_atual}/{p.estoque_minimo}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">Nenhum produto com estoque baixo.</p>
+            )}
+          </div>
+        </Card>
 
 
         <Card>

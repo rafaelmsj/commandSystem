@@ -59,14 +59,19 @@ export const ListagemRifas: React.FC<ListagemRifasProps> = ({ onNovaRifa, onEdit
   };
 
   const aplicarFiltros = () => {
-    const newParams = new URLSearchParams();
-    if (filtros.data) newParams.set('data', filtros.data);
-    if (filtros.status) newParams.set('status', filtros.status);
-    if (filtros.ganhador) newParams.set('ganhador', filtros.ganhador);
-    setSearchParams(newParams);
-    carregarRifas();
-    setIsFilterOpen(false);
-  };
+  const newParams = new URLSearchParams();
+  if (filtros.data) newParams.set('data', filtros.data);
+  if (filtros.status) newParams.set('status', filtros.status);
+  if (filtros.ganhador) newParams.set('ganhador', filtros.ganhador);
+  
+  setSearchParams(newParams);
+
+  // 👇 PASSAR OS FILTROS ATUAIS AQUI
+  carregarRifas(filtros);
+
+  setIsFilterOpen(false);
+};
+
 
 
   const limparFiltros = () => {

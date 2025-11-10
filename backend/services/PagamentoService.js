@@ -4,7 +4,7 @@ import ComandaService from './ComandaService.js';
 class PagamentoService {
   async getByComanda(comandaId) {
     try {
-      const [rows] = await db.execute(`
+      const [rows] = await db.query(`
         SELECT 
           id,
           comanda_id as comandaId,
@@ -39,7 +39,7 @@ class PagamentoService {
     }
 
     // Registrar o pagamento
-    const [result] = await db.execute(
+    const [result] = await db.query(
       `INSERT INTO pagamentos (comanda_id, valor, metodo_pagamento) VALUES (?, ?, ?)`,
       [comandaId, valor, metodoPagamento]
     );
@@ -48,7 +48,7 @@ class PagamentoService {
     await ComandaService.recalcularTotais(comandaId);
 
     // Buscar pagamento criado
-    const [rows] = await db.execute(`
+    const [rows] = await db.query(`
       SELECT 
         id,
         comanda_id as comandaId,
@@ -69,7 +69,7 @@ class PagamentoService {
   async delete(id) {
     try {
       // Buscar o pagamento para obter o comandaId
-      const [pagamento] = await db.execute(
+      const [pagamento] = await db.query(
         `SELECT comanda_id FROM pagamentos WHERE id = ?`,
         [id]
       );
@@ -81,7 +81,7 @@ class PagamentoService {
       const comandaId = pagamento[0].comanda_id;
       
       // Excluir o pagamento
-      const [result] = await db.execute(
+      const [result] = await db.query(
         `DELETE FROM pagamentos WHERE id = ?`,
         [id]
       );
