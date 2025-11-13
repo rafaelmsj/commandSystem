@@ -11,11 +11,13 @@ import EstoqueController from '../controllers/EstoqueController.js';
 import RifaController from '../controllers/RifaController.js';
 import LavacaoController from '../controllers/LavacaoController.js';
 import AuthController from '../controllers/AuthController.js';
+import UserController from '../controllers/userController.js';
 
 import verifyToken from '../middlewares/verifyToken.js';
 
-Router.post('/auth/register', AuthController.validateRegistration, AuthController.register);
 Router.post('/auth/login', AuthController.login);
+Router.post('/auth/forgot-password', AuthController.forgotPassword);
+Router.get('/premios/cliente', RifaController.BuscarPremios);
 
 Router.use(verifyToken);
 
@@ -55,7 +57,6 @@ Router.post('/rifas', RifaController.Create)
 Router.delete('/rifas/:rifa_id', RifaController.DeletarRifa)
 Router.get('/rifas', RifaController.GetAll)
 Router.get('/rifas/:id', RifaController.GetID)
-Router.get('/premios/cliente', RifaController.BuscarPremios);
 
 Router.put('/premios/:premio_id/entregar', RifaController.MarcarComoEntregue);
 Router.put('/premios/:premio_id', RifaController.AlterarPremio);
@@ -77,7 +78,10 @@ Router.get('/lavacoes/resumo-dia', LavacaoController.resumoDia);
 Router.get('/lavacoes/abertas', LavacaoController.resumoAbertas);
 Router.get('/lavacoes/antigas', LavacaoController.lavacoesAntigas);
 
-
-
+// 🔹 Rotas de usuário
+Router.get('/usuarios', UserController.list);
+Router.post('/usuarios', UserController.create);
+Router.put('/usuarios/senha', UserController.changePassword);
+Router.patch('/usuarios/:id/ativo', UserController.deactivate);
 
 export default Router;

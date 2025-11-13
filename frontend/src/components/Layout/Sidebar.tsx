@@ -12,6 +12,7 @@ import {
   Car,
   Wallet,
   Menu,
+  Settings,
   X
 } from 'lucide-react';
 
@@ -25,7 +26,11 @@ const navigation = [
   { name: 'Prêmios', href: '/premios-cliente', icon: Gift },
   { name: 'Movimentações', href: '/estoque/movimentacoes', icon: Repeat },
   { name: 'Lavação', href: '/lavacao', icon: Car },
+  { name: 'Configurações', href: '/usuarios', icon: Settings },
+  
 ];
+
+
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);

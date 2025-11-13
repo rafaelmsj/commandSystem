@@ -6,6 +6,12 @@ export const api = axios.create({
   withCredentials: false,
 });
 
+const token = localStorage.getItem("token");
+if (token) {
+  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+}
+
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -117,8 +123,8 @@ export default api;
 
 // Rifas
 export const rifaService = {
-  async listarRifas(filtros?: { data?: string; ganhador?: string; status?: string }) {
-    const { data } = await api.get<RifaCompleta[]>('/rifas', { params: filtros });
+  async listarRifas(filtros?: { data?: string; ganhador?: string; status?: string; page?: number; limit?: number }) {
+    const { data } = await api.get('/rifas', { params: filtros });
 
     let rifas = data.result;
 
@@ -129,8 +135,13 @@ export const rifaService = {
         )
       );
     }
-    return rifas;
-  },
+
+    return {
+      result: rifas,
+      pagination: data.pagination
+    };
+  }
+  ,
 
   async obterRifa(id: string): Promise<RifaCompleta | null> {
     const { data } = await api.get<RifaCompleta>(`/rifas/${id}`);

@@ -7,26 +7,18 @@
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@types/react-router-dom": "^5.3.3",
-    "axios": "^1.11.0",
-    "file-saver": "^2.0.5",
-    "framer-motion": "^12.23.24",
-    "jwt-decode": "^4.0.0",
+    "@supabase/supabase-js": "^2.57.4",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-google-recaptcha": "^3.1.0",
-    "react-router-dom": "^7.7.1",
-    "react-select": "^5.10.2",
-    "recharts": "^3.3.0",
-    "xlsx": "^0.18.5"
+    "react-router-dom": "^7.9.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
-    "@types/file-saver": "^2.0.7",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

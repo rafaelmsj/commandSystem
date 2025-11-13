@@ -22,6 +22,10 @@ import { MovimentacoesEstoque } from './pages/MovimentacoesEstoque';
 import { FluxoCaixa } from './pages/FluxoCaixa';
 import { LavacaoPage } from './pages/LavacaoPage';
 import Login from './pages/Login';
+import ConfiguracoesUsuarios from './pages/ConfiguracoesUsuarios';
+import UsuariosListagem from './pages/UsuariosListagem';
+import UsuariosCriar from './pages/UsuariosCriar';
+import UsuariosAlterarSenha from './pages/UsuariosAlterarSenha';
 
 // === Protected & Public Route wrappers ===
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -150,6 +154,10 @@ export default function App() {
             <Route path="estoque/movimentacoes" element={<MovimentacoesEstoque />} />
             <Route path="caixa" element={<FluxoCaixa />} />
             <Route path="lavacao" element={<LavacaoPage />} />
+            <Route path="usuarios/configuracoes" element={<ConfiguracoesUsuarios />} />
+            <Route path="usuarios" element={<UsuariosListagem />} />
+            <Route path="usuarios/novo" element={<UsuariosCriar />} />
+            <Route path="usuarios/alterar-senha" element={<UsuariosAlterarSenha />} />
           </Route>
         </Routes>
       </Router>

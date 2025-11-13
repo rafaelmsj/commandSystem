@@ -92,12 +92,13 @@ class DashboardService {
     try {
       const [rows] = await db.query(`
         SELECT 
-          DISTINCT(pdt.nome) AS nome_produto
-          ,COUNT(prm.produto_id) AS quantidade
-          , pdt.estoque_atual
+          pdt.nome AS nome_produto,
+          COUNT(prm.produto_id) AS quantidade,
+          pdt.estoque_atual
         FROM premios prm
         LEFT JOIN produto pdt ON pdt.id = prm.produto_id 
-        WHERE prm.status_entrega = 'pendente';
+        WHERE prm.status_entrega = 'pendente'
+        GROUP BY pdt.id, pdt.nome, pdt.estoque_atual;
       `);
 
       return rows;
