@@ -34,6 +34,17 @@ api.interceptors.response.use(
   }
 );
 
+api.interceptors.request.use((config) => {
+  const storedToken = localStorage.getItem("token");
+  console.log('teste')
+  if (storedToken) {
+    config.headers.Authorization = `Bearer ${storedToken}`;
+  }
+
+  return config;
+});
+
+
 // Clientes
 export const clienteService = {
   getAll: (params?: { search?: string }) => api.get<Cliente[]>('/clientes', { params }),
