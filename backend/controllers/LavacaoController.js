@@ -49,12 +49,12 @@ class LavacaoController {
                 params.push(dataFim);
             }
 
-            const [rows] = await db.execute(
+            const [rows] = await db.query(
                 `SELECT * FROM lavacoes ${where} ORDER BY data_lavagem DESC LIMIT ? OFFSET ?`,
                 [...params, Number(limit), Number(offset)]
             );
 
-            const [countResult] = await db.execute(`SELECT COUNT(*) as total FROM lavacoes ${where}`, params);
+            const [countResult] = await db.query(`SELECT COUNT(*) as total FROM lavacoes ${where}`, params);
 
             res.status(200).json({
                 success: true,
@@ -66,6 +66,7 @@ class LavacaoController {
                 },
             });
         } catch (err) {
+	    console.log(err)
             res.status(500).json({ success: false, message: 'Erro ao listar lavagens.', error: err.message });
         }
     }

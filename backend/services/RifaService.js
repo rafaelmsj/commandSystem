@@ -42,25 +42,25 @@ class RifaService {
   }
 
 
-  async GetAll({ filters = {}, page = 1, limit = 9 }) {
-    try {
-      const conditions = [];
-      const params = [];
+	async GetAll({ filters = {}, page = 1, limit = 9 }) {
+  try {
+    const conditions = [];
+    const params = [];
 
-      if (filters.status) {
-        conditions.push("LOWER(TRIM(r.status)) = LOWER(TRIM(?))");
-        params.push(filters.status);
-      }
+    if (filters.status) {
+      conditions.push("LOWER(TRIM(r.status)) = LOWER(TRIM(?))");
+      params.push(filters.status);
+    }
 
+    if (filters.data) {
+      conditions.push("DATE(r.data) = ?");
+      params.push(filters.data);
+    }
 
-      if (filters.data) {
-        conditions.push("DATE(r.data) = ?");
-        params.push(filters.data);
-      }
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
-      const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
-
-      const [countResult] = await db.query(`
+    // 1️⃣ TOTAL DE RIFAS (SEM LIMITAR)
+    const [countResult] = await db.query(`
       SELECT COUNT(DISTINCT r.id) AS total
       FROM rifas r
       LEFT JOIN colocacoes c ON c.rifa_id = r.id
@@ -68,9 +68,33 @@ class RifaService {
       ${whereClause};
     `, params);
 
-      const total = countResult[0]?.total || 0;
+    const total = countResult[0]?.total || 0;
 
-      const [rows] = await db.query(`
+    // 2️⃣ BUSCAR APENAS OS IDs DAS RIFAS DA PÁGINA (PAGINAÇÃO REAL)
+    const [rifaIdsRows] = await db.query(`
+      SELECT r.id
+      FROM rifas r
+      ${whereClause}
+      ORDER BY r.created_at DESC
+      LIMIT ? OFFSET ?;
+    `, [...params, limit, (page - 1) * limit]);
+
+    const rifaIds = rifaIdsRows.map(r => r.id);
+
+    if (rifaIds.length === 0) {
+      return {
+        success: true,
+        rifas: [],
+        pagination: {
+          total,
+          totalPages: Math.ceil(total / limit),
+          page: Number(page)
+        }
+      };
+    }
+
+    // 3️⃣ BUSCA COMPLETA DAS RIFAS (SEM LIMIT DE LINHA)
+    const [rows] = await db.query(`
       SELECT
         r.id AS rifa_id,
         r.nome AS rifa_nome,
@@ -93,65 +117,74 @@ class RifaService {
       FROM rifas r
       LEFT JOIN colocacoes c ON c.rifa_id = r.id
       LEFT JOIN premios p ON p.colocacao_id = c.id
-      ${whereClause}
-      ORDER BY r.created_at DESC, c.posicao ASC
-      LIMIT ? OFFSET ?;
-    `, [...params, limit, (page - 1) * limit]);
+      WHERE r.id IN (?)
+      ORDER BY r.created_at DESC, c.posicao ASC;
+    `, [rifaIds]);
 
-      const rifasMap = new Map();
+    // 4️⃣ MONTAR ESTRUTURA FINAL
+    const rifasMap = new Map();
 
-      for (const row of rows) {
-        const rifaId = row.rifa_id;
+    for (const row of rows) {
+      const rifaId = row.rifa_id;
 
-        if (!rifasMap.has(rifaId)) {
-          rifasMap.set(rifaId, {
-            id: rifaId,
-            nome: row.rifa_nome,
-            data: row.rifa_data,
-            status: row.rifa_status,
-            quantidade_ganhadores: row.quantidade_ganhadores,
-            createdAt: row.rifa_createdAt,
-            colocacoes: []
-          });
-        }
-
-        const rifa = rifasMap.get(rifaId);
-
-        if (row.colocacao_id) {
-          let colocacao = rifa.colocacoes.find(c => c.id === row.colocacao_id);
-
-          if (!colocacao) {
-            colocacao = {
-              id: row.colocacao_id,
-              rifa_id: rifaId,
-              posicao: row.posicao,
-              ganhador_nome: row.ganhador_nome,
-              createdAt: row.colocacao_createdAt,
-              premios: []
-            };
-            rifa.colocacoes.push(colocacao);
-          }
-
-          if (row.premio_id) {
-            colocacao.premios.push({
-              id: row.premio_id,
-              colocacao_id: row.colocacao_id,
-              nome_produto: row.nome_produto,
-              quantidade: row.quantidade,
-              status_entrega: row.status_entrega,
-              createdAt: row.premio_createdAt
-            });
-          }
-        }
+      if (!rifasMap.has(rifaId)) {
+        rifasMap.set(rifaId, {
+          id: rifaId,
+          nome: row.rifa_nome,
+          data: row.rifa_data,
+          status: row.rifa_status,
+          quantidade_ganhadores: row.quantidade_ganhadores,
+          createdAt: row.rifa_createdAt,
+          colocacoes: []
+        });
       }
 
-      return { success: true, rifas: Array.from(rifasMap.values()), pagination: { total, totalPages: Math.ceil(total / limit), page: Number(page) } };
+      const rifa = rifasMap.get(rifaId);
 
-    } catch (error) {
-      console.error('Erro em RifaService.GetAll:', error);
-      throw error;
+      if (row.colocacao_id) {
+        let colocacao = rifa.colocacoes.find(c => c.id === row.colocacao_id);
+
+        if (!colocacao) {
+          colocacao = {
+            id: row.colocacao_id,
+            rifa_id: rifaId,
+            posicao: row.posicao,
+            ganhador_nome: row.ganhador_nome,
+            createdAt: row.colocacao_createdAt,
+            premios: []
+          };
+          rifa.colocacoes.push(colocacao);
+        }
+
+        if (row.premio_id) {
+          colocacao.premios.push({
+            id: row.premio_id,
+            colocacao_id: row.colocacao_id,
+            nome_produto: row.nome_produto,
+            quantidade: row.quantidade,
+            status_entrega: row.status_entrega,
+            createdAt: row.premio_createdAt
+          });
+        }
+      }
     }
+
+    return {
+      success: true,
+      rifas: Array.from(rifasMap.values()),
+      pagination: {
+        total,
+        totalPages: Math.ceil(total / limit),
+        page: Number(page)
+      }
+    };
+
+  } catch (error) {
+    console.error('Erro em RifaService.GetAll:', error);
+    throw error;
   }
+}
+
 
   async GetById(id) {
     try {
@@ -353,7 +386,10 @@ class RifaService {
       LEFT JOIN rifas rif ON rif.id = col.rifa_id
       LEFT JOIN produto pro ON pro.id = pre.produto_id
       LEFT JOIN client cli ON col.ganhador_id = cli.id
-      WHERE col.ganhador_nome LIKE ? OR cli.number LIKE ? AND rif.status = 'finalizada' AND status_entrega LIKE ?
+      WHERE 
+  (col.ganhador_nome LIKE ? OR cli.number LIKE ?)
+  AND rif.status = 'finalizada'
+  AND pre.status_entrega LIKE ?
     `;
 
       const search = `%${nome}%`;

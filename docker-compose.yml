@@ -1,0 +1,28 @@
+services:
+  drinksdasorte-backend:
+    build: ./backend
+    container_name: drinksdasorte-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    networks:
+      - web
+
+  drinksdasorte-frontend:
+    build: ./frontend
+    container_name: drinksdasorte-frontend
+    restart: unless-stopped
+    networks:
+      - web
+
+  drinksdasorte-site:
+    build: ./site
+    container_name: drinksdasorte-site
+    restart: unless-stopped
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
